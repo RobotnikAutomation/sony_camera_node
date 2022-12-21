@@ -7,6 +7,10 @@ namespace fs = std::experimental::filesystem;
 #include <filesystem>
 namespace fs = std::filesystem;
 #endif
+#include <iostream>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 #include <fstream>
 #include <thread>
 #include "CRSDK/CrDeviceProperty.h"
@@ -56,6 +60,25 @@ CameraDevice::CameraDevice(CRLibInterface const* cr_lib, SCRSDK::ICrCameraObject
         // Do nothing
         break;
     }
+
+    fs::path fs_path(fs::path(getenv("HOME")));
+    fs_path.append(TEXT("sony/images"));
+
+    // Add folder with timestamp
+    auto t = std::time(nullptr);
+    auto tm = *std::localtime(&t);
+    std::ostringstream oss;
+    oss << std::put_time(&tm, "%Y%m%d%H%M%S");
+    auto str = oss.str();
+
+    fs_path.append(str);
+
+    path = fs_path.native();
+
+    if (!fs::is_directory(path) || !fs::exists(path)) { // Check if src folder exists
+      fs::create_directories(path); // create folder
+    }
+
 }
 
 CameraDevice::~CameraDevice()
@@ -107,6 +130,18 @@ void CameraDevice::capture_image() const
     tout << "Shutter up\n";
     // m_cr_lib->SendCommand(m_device_handle, SDK::CrCommandId::CrCommandId_Release, SDK::CrCommandParam_Up);
     SDK::SendCommand(m_device_handle, SDK::CrCommandId::CrCommandId_Release, SDK::CrCommandParam_Up);
+}
+
+void CameraDevice::focus() const
+{
+  tout << "S1 shooting...\n";
+  tout << "Shutter Halfpress down\n";
+  SDK::CrDeviceProperty prop;
+  prop.SetCode(SDK::CrDevicePropertyCode::CrDeviceProperty_S1);
+  prop.SetCurrentValue(SDK::CrLockIndicator::CrLockIndicator_Locked);
+  prop.SetValueType(SDK::CrDataType::CrDataType_UInt16);
+  SDK::SetDeviceProperty(m_device_handle, &prop);
+  std::this_thread::sleep_for(1500ms);
 }
 
 void CameraDevice::s1_shooting() const
@@ -208,7 +243,7 @@ void CameraDevice::continuous_shooting() const
     SDK::SendCommand(m_device_handle, SDK::CrCommandId::CrCommandId_Release, SDK::CrCommandParam::CrCommandParam_Down);
 
     // Wait, then send shutter up
-    std::this_thread::sleep_for(500ms);
+    std::this_thread::sleep_for(1500ms);
     tout << "Shutter up\n";
     SDK::SendCommand(m_device_handle, SDK::CrCommandId::CrCommandId_Release, SDK::CrCommandParam::CrCommandParam_Up);
 }
@@ -333,11 +368,17 @@ void CameraDevice::get_live_view()
             {
                 // Display
                 // etc.
-                auto path = fs::current_path();
-                path.append(TEXT("LiveView000000.JPG"));
-                tout << path << '\n';
+                fs::path temp_path(fs::path(getenv("HOME")));
+                temp_path.append(TEXT("sony"));
 
-                std::ofstream file(path, std::ios::out | std::ios::binary);
+                // if (!fs::is_directory(path) || !fs::exists(path)) { // Check if src folder exists
+                //   fs::create_directory(path); // create src folder
+                // }
+                // auto path = fs::current_path();
+                temp_path.append(TEXT("LiveView000000.JPG"));
+                tout << temp_path << '\n';
+
+                std::ofstream file(temp_path, std::ios::out | std::ios::binary);
                 if (!file.bad())
                 {
                     file.write((char*)image_data->GetImageData(), image_data->GetImageSize());
@@ -403,7 +444,7 @@ void CameraDevice::get_zoom_operation()
     tout << "Zoom Setting Type: " << format_zoom_setting_type(m_prop.zoom_setting_type.current) << '\n';
     tout << "Zoom Type Status: " << format_zoom_types_status(m_prop.zoom_types_status.current) << '\n';
     tout << "Zoom Operation: " << format_zoom_operation(m_prop.zoom_operation.current) << '\n';
-   
+
     std::int32_t nprop = 0;
     SDK::CrDeviceProperty* prop_list = nullptr;
     auto status = SDK::GetDeviceProperties(m_device_handle, &prop_list, &nprop);
@@ -470,7 +511,7 @@ bool CameraDevice::get_image_data(SCRSDK::CrImageDataBlock *image_data, CrInt8u 
         }
         else {
             if (0 < image_data->GetSize()) {
-                tout << "Get Image Data SUCCESS, image size = " 
+                tout << "Get Image Data SUCCESS, image size = "
                      << image_data->GetSize() << "\n";
             }
             else {
@@ -578,7 +619,17 @@ void CameraDevice::set_iso()
 
 bool CameraDevice::set_save_info() const
 {
-    text path = fs::current_path().native();
+    // text path = fs::current_path().native();
+
+    // fs::path fs_path(fs::path(getenv("HOME")));
+    // fs_path.append(TEXT("sony/images"));
+    //
+    // text path = fs_path.native();
+    //
+    // if (!fs::is_directory(path) || !fs::exists(path)) { // Check if src folder exists
+    //   fs::create_directories(path); // create src folder
+    // }
+
     tout << path.data() << '\n';
     CrChar *prefix = TEXT("AAA");
     tout << "prefix = " << prefix << "\n";
@@ -1125,7 +1176,7 @@ void CameraDevice::set_select_media_format()
     int selected_index = 0;
     ss >> selected_index;
 
-    if (selected_index <= 0) 
+    if (selected_index <= 0)
     {
         tout << "Input cancelled.\n";
         return;
@@ -1168,13 +1219,13 @@ void CameraDevice::set_select_media_format()
             return;
         }
 
-        
+
         if (prop_list && nprop > 0) {
             // Got properties list
             for (std::int32_t i = 0; i < nprop; ++i) {
                 auto prop = prop_list[i];
                 int nval = 0;
-                
+
 
                 if(SDK::CrDevicePropertyCode::CrDeviceProperty_Media_FormatProgressRate == prop.GetCode())
                 {
@@ -1310,7 +1361,7 @@ void CameraDevice::set_custom_wb()
     std::this_thread::sleep_for(2000ms);
     get_white_balance();
 
-    // Set, custom WB capture standby 
+    // Set, custom WB capture standby
     tout << std::endl << "Set custom WB capture standby " << std::endl;
 
     bool execStat = false;
@@ -1321,13 +1372,13 @@ void CameraDevice::set_custom_wb()
         execStat = get_custom_wb();
     }
 
-    // Set, custom WB capture 
+    // Set, custom WB capture
     tout << std::endl << "Set custom WB capture ";
     execute_pos_xy(SDK::CrDevicePropertyCode::CrDeviceProperty_CustomWB_Capture);
 
     std::this_thread::sleep_for(5000ms);
 
-    // Set, custom WB capture standby cancel 
+    // Set, custom WB capture standby cancel
     text input;
     tout << std::endl << "Set custom WB capture standby cancel. Please enter something. " << std::endl;
     std::getline(tin, input);
@@ -1714,7 +1765,7 @@ void CameraDevice::load_properties()
                 m_prop.customwb_capture_execution_state.current = static_cast<std::uint16_t>(prop.GetCurrentValue());
                 if (nval != m_prop.customwb_capture_execution_state.possible.size()) {
                     std::vector<uint16_t> mode = parse_customwb_capture_execution_state(prop.GetValues(), nval);
-                    m_prop.customwb_capture_execution_state.possible.swap(mode);                  
+                    m_prop.customwb_capture_execution_state.possible.swap(mode);
                 }
                 break;
             case SDK::CrDevicePropertyCode::CrDeviceProperty_Zoom_Operation_Status:

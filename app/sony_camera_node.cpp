@@ -27,15 +27,7 @@ int main(int argc, char **argv)
     // declare a node handle
     //
     ros::NodeHandle nh;
-    //
-    // set the maximum number of messages storable in the queue buffer
-    //
-    int queue_size = 1000;
-    //
-    // calling advertise instantiates a Publiser object
-    //
-    ros::Publisher pub = nh.advertise<std_msgs::String>(
-                "camera_hello", queue_size);
+
     //
     // instantiate a CameraControl object to enable
     // access to service callback and to encapsulate
@@ -43,6 +35,9 @@ int main(int argc, char **argv)
     //
     CameraControl camera_control;
     ROS_INFO_STREAM("Camera control object, command value = " << camera_control.get_control_value());
+
+    ros::Publisher current_path_pub = nh.advertise<std_msgs::String>("current_path", 1);
+
     //
     // instantiate a service to be called to save an image to file
     //
@@ -54,7 +49,7 @@ int main(int argc, char **argv)
     // set the loop rate used by spin to control while loop execution
     // this is an integer that equates to loops/second
     //
-    ros::Rate loop_rate = .5;
+    ros::Rate loop_rate = 5;
     //
     // create a variable to hold the loop count
     //
@@ -67,7 +62,7 @@ int main(int argc, char **argv)
     // create a msg object to hole the string
     //
     std_msgs::String msg;
-    std::stringstream msg_ss; 
+    std::stringstream msg_ss;
     //
     ////////// Sony camera setup code follows
     //
@@ -101,7 +96,7 @@ int main(int argc, char **argv)
     }
     CrInt32u no = 0;
     if (ncams > 0) {
-        no = 1;        
+        no = 1;
     }
     else {
         no = 0;
@@ -129,6 +124,13 @@ int main(int argc, char **argv)
 
     camera.set_save_info();
 
+
+    sleep(2);
+    std_msgs::String path;
+    path.data = camera.path;
+    current_path_pub.publish(path);
+
+    camera.focus();
     //
     // main ROS loop
     //
@@ -137,10 +139,6 @@ int main(int argc, char **argv)
         final_count = loop_count;
         msg_ss << "loop count: \n" << loop_count;
         msg.data = msg_ss.str();
-        //
-        // publish the message to the topic
-        //
-        pub.publish(msg);
         //
         // acquire the live image and assign it to the image block
         //
@@ -169,11 +167,16 @@ int main(int argc, char **argv)
         else if (1 == camera_control.get_control_value()) {
             if (camera.set_save_info()) {
                 camera.capture_image();
+                camera.focus();
+                camera_control.set_control_value(live);
             }
         }
         else if (2 == camera_control.get_control_value()) {
             camera.get_live_view();
         }
+        // else if (3 == camera_control.get_control_value()) {
+        //     camera.focus();
+        // }
         else {
             camera_control.set_control_value(idle);
         }

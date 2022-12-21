@@ -30,6 +30,7 @@ public:
     /*** Shooting operations ***/
 
     void capture_image() const;
+    void focus() const;
     void s1_shooting() const;
     void af_shutter() const;
     void continuous_shooting() const;
@@ -80,6 +81,8 @@ public:
     std::uint32_t ip_address() const;
     text mac_address() const;
     std::int16_t pid() const;
+
+    text path;
 
 public:
     // Inherited via IDeviceCallback

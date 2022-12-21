@@ -110,14 +110,14 @@ add_executable(${sony_camera_node}
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/sony_camera_node_node.cpp)
-add_executable(pub_node src/pub_node.cpp)
-add_executable(sub_node src/sub_node.cpp)
-add_executable(camera_interface_node src/camera_interface_node.cpp)
-add_executable(uvc_camera_node src/uvc_camera_node.cpp)
-add_executable(optical_flow_node src/optical_flow_node.cpp)
-add_executable(visual_odometry_node src/visual_odometry_node.cpp)
-add_executable(live_img_vis_odom_node src/live_img_vis_odom_node.cpp)
-add_executable(calibrate_camera_node src/calibrate_camera_node.cpp)
+#add_executable(pub_node src/pub_node.cpp)
+#add_executable(sub_node src/sub_node.cpp)
+#add_executable(camera_interface_node src/camera_interface_node.cpp)
+#add_executable(uvc_camera_node src/uvc_camera_node.cpp)
+#add_executable(optical_flow_node src/optical_flow_node.cpp)
+#add_executable(visual_odometry_node src/visual_odometry_node.cpp)
+#add_executable(live_img_vis_odom_node src/live_img_vis_odom_node.cpp)
+#add_executable(calibrate_camera_node src/calibrate_camera_node.cpp)
 
 set_target_properties(${sony_camera_node} PROPERTIES
     CXX_STANDARD 17
@@ -182,32 +182,32 @@ add_custom_command(TARGET ${sony_camera_node} PRE_BUILD
 #   ${catkin_LIBRARIES}
 # )
 target_link_libraries(${sony_camera_node} ${catkin_LIBRARIES})
-target_link_libraries(pub_node ${catkin_LIBRARIES})
-target_link_libraries(sub_node ${catkin_LIBRARIES})
-target_link_libraries(camera_interface_node ${catkin_LIBRARIES})
-target_link_libraries(uvc_camera_node 
-	${catkin_LIBRARIES}
-	${OpenCV_LIBRARIES}
-)
-target_link_libraries(optical_flow_node 
-	${catkin_LIBRARIES} 
-	${OpenCV_LIBRARIES}
-)
+#target_link_libraries(pub_node ${catkin_LIBRARIES})
+#target_link_libraries(sub_node ${catkin_LIBRARIES})
+#target_link_libraries(camera_interface_node ${catkin_LIBRARIES})
+#target_link_libraries(uvc_camera_node
+#	${catkin_LIBRARIES}
+#	${OpenCV_LIBRARIES}
+#)
+#target_link_libraries(optical_flow_node
+#	${catkin_LIBRARIES}
+#	${OpenCV_LIBRARIES}
+#)
 
-target_link_libraries(visual_odometry_node 
-	${catkin_LIBRARIES} 
-	${OpenCV_LIBRARIES}
-)
+#target_link_libraries(visual_odometry_node
+#	${catkin_LIBRARIES}
+#	${OpenCV_LIBRARIES}
+#)
 
-target_link_libraries(live_img_vis_odom_node 
-	${catkin_LIBRARIES} 
-	${OpenCV_LIBRARIES}
-)
+#target_link_libraries(live_img_vis_odom_node
+#	${catkin_LIBRARIES}
+#	${OpenCV_LIBRARIES}
+#)
 
-target_link_libraries(calibrate_camera_node 
-	${catkin_LIBRARIES} 
-	${OpenCV_LIBRARIES}
-)
+#target_link_libraries(calibrate_camera_node
+#	${catkin_LIBRARIES}
+#	${OpenCV_LIBRARIES}
+#)
 
 ## Install application
 ## '.' means, install to the root directory of CMAKE_INSTALL_PREFIX

@@ -13,6 +13,7 @@
 #include <sony_camera_node/CameraCommand.h>
 
 static const int idle = 99;
+static const int live = 2;
 
 class CameraControl
 {
@@ -26,9 +27,9 @@ public:
     }
     void set_control_value(int value)
     {
-        control_value = idle;
+        control_value = value;
     }
-    bool callback(sony_camera_node::CameraCommandRequest& request, 
+    bool callback(sony_camera_node::CameraCommandRequest& request,
                   sony_camera_node::CameraCommandResponse& response)
     {
         if (request.command > -1 && request.command <= idle) {
@@ -60,7 +61,7 @@ public:
         } catch (cv_bridge::Exception& e) {
             ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
         }
-        
+
     }
     cv::Mat get_image_data()
     {
