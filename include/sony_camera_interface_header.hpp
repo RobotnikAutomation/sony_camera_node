@@ -6,10 +6,10 @@
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/image_encodings.h>
 #include <image_transport/image_transport.h>
-#include <opencv4/opencv2/core.hpp>
-#include <opencv4/opencv2/videoio.hpp>
-#include <opencv4/opencv2/highgui.hpp>
-#include <cv_bridge/cv_bridge.h>
+// #include <opencv4/opencv2/core.hpp>
+// #include <opencv4/opencv2/videoio.hpp>
+// #include <opencv4/opencv2/highgui.hpp>
+// #include <cv_bridge/cv_bridge.h>
 #include <sony_camera_node/CameraCommand.h>
 
 static const int idle = 99;
@@ -48,28 +48,28 @@ private:
 //
 // create an image class to encapsulate the image data
 //
-class ImageControl
-{
-public:
-    ImageControl(){};
-    ~ImageControl(){};
-    void image_data_callback(const sensor_msgs::ImageConstPtr& msg)
-    {
-        try {
-            cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
-            data = cv::Mat(cv_ptr->image);
-        } catch (cv_bridge::Exception& e) {
-            ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
-        }
-
-    }
-    cv::Mat get_image_data()
-    {
-        return data;
-    }
-private:
-    cv_bridge::CvImagePtr cv_ptr;
-    cv::Mat data;
-};
+// class ImageControl
+// {
+// public:
+//     ImageControl(){};
+//     ~ImageControl(){};
+//     void image_data_callback(const sensor_msgs::ImageConstPtr& msg)
+//     {
+//         try {
+//             cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+//             data = cv::Mat(cv_ptr->image);
+//         } catch (cv_bridge::Exception& e) {
+//             ROS_ERROR("Could not convert from '%s' to 'bgr8'.", msg->encoding.c_str());
+//         }
+//
+//     }
+//     cv::Mat get_image_data()
+//     {
+//         return data;
+//     }
+// private:
+//     cv_bridge::CvImagePtr cv_ptr;
+//     cv::Mat data;
+// };
 
 #endif

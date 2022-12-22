@@ -124,7 +124,6 @@ int main(int argc, char **argv)
 
     camera.set_save_info();
 
-
     sleep(2);
     std_msgs::String path;
     path.data = camera.path;

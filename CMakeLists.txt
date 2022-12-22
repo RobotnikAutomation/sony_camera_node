@@ -14,10 +14,10 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   image_transport
   message_generation
-  cv_bridge
+#  cv_bridge
 )
 
-find_package(OpenCV 4 REQUIRED)
+#find_package(OpenCV 4 REQUIRED)
 
 ################################################
 ## Declare ROS messages, services and actions ##
@@ -95,7 +95,7 @@ include(enum_crsdk_hdr)
 include_directories(
   include
   ${catkin_INCLUDE_DIRS}
-  ${OpenCV_INCLUDE_DIRS}
+#  ${OpenCV_INCLUDE_DIRS}
 )
 
 ### Define output target ###
