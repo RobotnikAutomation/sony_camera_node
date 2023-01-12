@@ -57,7 +57,7 @@ public:
 
     void set_aperture();
     void set_iso();
-    bool set_save_info() const;
+    bool set_save_info();
     void set_shutter_speed();
     void set_position_key_setting();
     void set_exposure_program_mode();
@@ -83,6 +83,8 @@ public:
     std::int16_t pid() const;
 
     text path;
+
+    std::string filename_;
 
 public:
     // Inherited via IDeviceCallback

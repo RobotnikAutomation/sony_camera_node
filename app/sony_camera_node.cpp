@@ -36,7 +36,8 @@ int main(int argc, char **argv)
     CameraControl camera_control;
     ROS_INFO_STREAM("Camera control object, command value = " << camera_control.get_control_value());
 
-    ros::Publisher current_path_pub = nh.advertise<std_msgs::String>("current_path", 1);
+    ros::Subscriber picture_path_sub = nh.subscribe("picture_path", 1000, &CameraControl::getPicturePathCB, &camera_control);
+    ros::Publisher current_image_pub = nh.advertise<std_msgs::String>("current_image", 1);
 
     //
     // instantiate a service to be called to save an image to file
@@ -124,11 +125,6 @@ int main(int argc, char **argv)
 
     camera.set_save_info();
 
-    sleep(2);
-    std_msgs::String path;
-    path.data = camera.path;
-    current_path_pub.publish(path);
-
     camera.focus();
     //
     // main ROS loop
@@ -145,6 +141,12 @@ int main(int argc, char **argv)
         ROS_INFO_STREAM("image data size = " << (int)image_data->GetSize());
 
         ROS_INFO_STREAM("test command value = " << (int)camera_control.get_control_value());
+
+        if(camera_control.new_path_)
+        {
+            camera.path = camera_control.picture_path_.data;
+            camera_control.new_path_ = false;
+        }
 
         if (0 == camera_control.get_control_value()) {
             if (camera.connected()) {
@@ -165,8 +167,14 @@ int main(int argc, char **argv)
         }
         else if (1 == camera_control.get_control_value()) {
             if (camera.set_save_info()) {
+                ROS_INFO("Hello");
+                std_msgs::String msg;
                 camera.capture_image();
                 camera.focus();
+                
+                msg.data = camera.filename_;
+                current_image_pub.publish(msg);
+                
                 camera_control.set_control_value(live);
             }
         }

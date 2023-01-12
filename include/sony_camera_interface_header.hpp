@@ -19,7 +19,7 @@ class CameraControl
 {
 public:
     CameraControl()
-    {control_value = idle;};
+    {control_value = live;};
     ~CameraControl(){};
     int get_control_value()
     {
@@ -28,6 +28,11 @@ public:
     void set_control_value(int value)
     {
         control_value = value;
+    }
+    void getPicturePathCB(const std_msgs::String &msg)
+    {
+        picture_path_ = msg;
+        new_path_ = true;
     }
     bool callback(sony_camera_node::CameraCommandRequest& request,
                   sony_camera_node::CameraCommandResponse& response)
@@ -41,6 +46,9 @@ public:
             return false;
         }
     }
+
+    std_msgs::String picture_path_;
+    bool new_path_ = false;
 private:
     int control_value;
 };

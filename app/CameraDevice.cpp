@@ -44,7 +44,7 @@ CameraDevice::CameraDevice(CRLibInterface const* cr_lib, SCRSDK::ICrCameraObject
         camera_info->GetAdaptorName(),
         camera_info->GetPairingNecessity()
     );
-
+  
     m_conn_type = parse_connection_type(m_info->GetConnectionTypeName());
     switch (m_conn_type)
     {
@@ -60,25 +60,6 @@ CameraDevice::CameraDevice(CRLibInterface const* cr_lib, SCRSDK::ICrCameraObject
         // Do nothing
         break;
     }
-
-    fs::path fs_path(fs::path(getenv("HOME")));
-    fs_path.append(TEXT("sony/images"));
-
-    // Add folder with timestamp
-    auto t = std::time(nullptr);
-    auto tm = *std::localtime(&t);
-    std::ostringstream oss;
-    oss << std::put_time(&tm, "%Y%m%d%H%M%S");
-    auto str = oss.str();
-
-    fs_path.append(str);
-
-    path = fs_path.native();
-
-    if (!fs::is_directory(path) || !fs::exists(path)) { // Check if src folder exists
-      fs::create_directories(path); // create folder
-    }
-
 }
 
 CameraDevice::~CameraDevice()
@@ -369,11 +350,12 @@ void CameraDevice::get_live_view()
                 // Display
                 // etc.
                 fs::path temp_path(fs::path(getenv("HOME")));
-                temp_path.append(TEXT("sony"));
+                temp_path.append(TEXT("sony_streaming"));
 
-                // if (!fs::is_directory(path) || !fs::exists(path)) { // Check if src folder exists
-                //   fs::create_directory(path); // create src folder
-                // }
+                if (!fs::is_directory(temp_path) || !fs::exists(temp_path)) { // Check if src folder exists
+                  fs::create_directory(temp_path); // create src folder
+                }
+
                 // auto path = fs::current_path();
                 temp_path.append(TEXT("LiveView000000.JPG"));
                 tout << temp_path << '\n';
@@ -617,7 +599,7 @@ void CameraDevice::set_iso()
     SDK::SetDeviceProperty(m_device_handle, &prop);
 }
 
-bool CameraDevice::set_save_info() const
+bool CameraDevice::set_save_info() 
 {
     // text path = fs::current_path().native();
 
@@ -646,6 +628,8 @@ bool CameraDevice::set_save_info() const
         tout << "Failed to set save path.\n";
         return false;
     }
+    
+    filename_ = std::string("AAA") + std::to_string(no);
     return true;
 }
 
