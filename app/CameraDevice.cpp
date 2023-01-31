@@ -1,4 +1,4 @@
-﻿#include "CameraDevice.h"
+#include "CameraDevice.h"
 #include <chrono>
 #if defined(__GNUC__) && __GNUC__ < 8
 #include <experimental/filesystem>
@@ -44,7 +44,7 @@ CameraDevice::CameraDevice(CRLibInterface const* cr_lib, SCRSDK::ICrCameraObject
         camera_info->GetAdaptorName(),
         camera_info->GetPairingNecessity()
     );
-  
+
     m_conn_type = parse_connection_type(m_info->GetConnectionTypeName());
     switch (m_conn_type)
     {
@@ -74,7 +74,7 @@ bool CameraDevice::connect()
     if (CR_FAILED(connect_status)) {
         return false;
     }
-    set_save_info();
+    // set_save_info();
     return true;
 }
 
@@ -122,7 +122,7 @@ void CameraDevice::focus() const
   prop.SetCurrentValue(SDK::CrLockIndicator::CrLockIndicator_Locked);
   prop.SetValueType(SDK::CrDataType::CrDataType_UInt16);
   SDK::SetDeviceProperty(m_device_handle, &prop);
-  std::this_thread::sleep_for(1500ms);
+  std::this_thread::sleep_for(1s);
 }
 
 void CameraDevice::s1_shooting() const
@@ -288,7 +288,7 @@ void CameraDevice::get_focus_mode()
 
 void CameraDevice::get_live_view()
 {
-    tout << "GetLiveView...\n";
+    // tout << "GetLiveView...\n";
 
     CrInt32 num = 0;
     SDK::CrLiveViewProperty* property = NULL;
@@ -306,7 +306,7 @@ void CameraDevice::get_live_view()
     }
 
     CrInt32u bufSize = inf.GetBufferSize();
-    tout << "buffer size " << bufSize << " \n";
+    // tout << "buffer size " << bufSize << " \n";
     if (bufSize < 1)
     {
         tout << "GetLiveView FAILED \n";
@@ -358,7 +358,7 @@ void CameraDevice::get_live_view()
 
                 // auto path = fs::current_path();
                 temp_path.append(TEXT("LiveView000000.JPG"));
-                tout << temp_path << '\n';
+                // tout << temp_path << '\n';
 
                 std::ofstream file(temp_path, std::ios::out | std::ios::binary);
                 if (!file.bad())
@@ -366,7 +366,7 @@ void CameraDevice::get_live_view()
                     file.write((char*)image_data->GetImageData(), image_data->GetImageSize());
                     file.close();
                 }
-                tout << "GetLiveView SUCCESS\n";
+                // tout << "GetLiveView SUCCESS\n";
                 delete[] image_buff; // Release
                 delete image_data; // Release
             }
@@ -453,7 +453,7 @@ void CameraDevice::get_zoom_operation()
 
 bool CameraDevice::get_image_data(SCRSDK::CrImageDataBlock *image_data, CrInt8u *image_buff)
 {
-    tout << "Get Image data...\n";
+    // tout << "Get Image data...\n";
 
     SDK::CrImageInfo inf;
     auto err = SDK::GetLiveViewImageInfo(m_device_handle, &inf);
@@ -462,7 +462,7 @@ bool CameraDevice::get_image_data(SCRSDK::CrImageDataBlock *image_data, CrInt8u 
         return false;
     }
     CrInt32u bufSize = inf.GetBufferSize();
-    tout << "bufSize = " << bufSize << "\n";
+
     if (bufSize < 1) {
         tout << "Get Image Data FAILED buffer size\n";
         return false;
@@ -493,8 +493,8 @@ bool CameraDevice::get_image_data(SCRSDK::CrImageDataBlock *image_data, CrInt8u 
         }
         else {
             if (0 < image_data->GetSize()) {
-                tout << "Get Image Data SUCCESS, image size = "
-                     << image_data->GetSize() << "\n";
+                // tout << "Get Image Data SUCCESS, image size = "
+                    //  << image_data->GetSize() << "\n";
             }
             else {
                 // FAILED
@@ -599,7 +599,7 @@ void CameraDevice::set_iso()
     SDK::SetDeviceProperty(m_device_handle, &prop);
 }
 
-bool CameraDevice::set_save_info() 
+bool CameraDevice::set_save_info()
 {
     // text path = fs::current_path().native();
 
@@ -628,8 +628,7 @@ bool CameraDevice::set_save_info()
         tout << "Failed to set save path.\n";
         return false;
     }
-    
-    filename_ = std::string("AAA") + std::to_string(no);
+
     return true;
 }
 
@@ -1572,6 +1571,7 @@ void CameraDevice::OnLvPropertyChanged()
 void CameraDevice::OnCompleteDownload(CrChar* filename)
 {
     text file(filename);
+    filename_ = file.data();
     tout << "Complete download. File: " << file.data() << '\n';
 }
 

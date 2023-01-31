@@ -1,4 +1,4 @@
-﻿#include <ros/ros.h>
+#include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <sony_camera_node/CameraCommand.h>
 #include <sstream>
@@ -123,12 +123,11 @@ int main(int argc, char **argv)
     SDK::CrImageDataBlock *image_data = new SDK::CrImageDataBlock();
     CrInt8u* image_buff = nullptr;
 
-    camera.set_save_info();
-
-    camera.focus();
     //
     // main ROS loop
     //
+    sleep(1);
+
     while (ros::ok() && loop_count > -1) {
         ++loop_count;
         final_count = loop_count;
@@ -138,9 +137,9 @@ int main(int argc, char **argv)
         // acquire the live image and assign it to the image block
         //
         camera.get_image_data(image_data, image_buff);
-        ROS_INFO_STREAM("image data size = " << (int)image_data->GetSize());
+        // ROS_INFO_STREAM("image data size = " << (int)image_data->GetSize());
 
-        ROS_INFO_STREAM("test command value = " << (int)camera_control.get_control_value());
+        // ROS_INFO_STREAM("test command value = " << (int)camera_control.get_control_value());
 
         if(camera_control.new_path_)
         {
@@ -167,23 +166,26 @@ int main(int argc, char **argv)
         }
         else if (1 == camera_control.get_control_value()) {
             if (camera.set_save_info()) {
-                ROS_INFO("Hello");
+
                 std_msgs::String msg;
                 camera.capture_image();
                 camera.focus();
-                
+
+                sleep(3);
                 msg.data = camera.filename_;
                 current_image_pub.publish(msg);
-                
+
                 camera_control.set_control_value(live);
             }
         }
         else if (2 == camera_control.get_control_value()) {
             camera.get_live_view();
         }
-        // else if (3 == camera_control.get_control_value()) {
-        //     camera.focus();
-        // }
+        else if (3 == camera_control.get_control_value())
+        {
+            camera.focus();
+            camera_control.set_control_value(live);
+        }
         else {
             camera_control.set_control_value(idle);
         }
