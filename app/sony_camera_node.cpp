@@ -1,4 +1,4 @@
-#include <ros/ros.h>
+﻿#include <ros/ros.h>
 #include <std_msgs/String.h>
 #include <sony_camera_node/CameraCommand.h>
 #include <sstream>
@@ -37,7 +37,6 @@ int main(int argc, char **argv)
     ROS_INFO_STREAM("Camera control object, command value = " << camera_control.get_control_value());
 
     ros::Subscriber picture_path_sub = nh.subscribe("picture_path", 1000, &CameraControl::getPicturePathCB, &camera_control);
-    ros::Publisher current_image_pub = nh.advertise<std_msgs::String>("current_image", 1);
 
     //
     // instantiate a service to be called to save an image to file
@@ -46,6 +45,7 @@ int main(int argc, char **argv)
                 "sony_camera_node/camera_command",
                 &CameraControl::callback,
                 &camera_control);
+
     //
     // set the loop rate used by spin to control while loop execution
     // this is an integer that equates to loops/second
@@ -170,10 +170,6 @@ int main(int argc, char **argv)
                 std_msgs::String msg;
                 camera.capture_image();
                 camera.focus();
-
-                sleep(3);
-                msg.data = camera.filename_;
-                current_image_pub.publish(msg);
 
                 camera_control.set_control_value(live);
             }
